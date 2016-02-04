@@ -26,13 +26,19 @@ var led2 = new gpio(16, 'out');
 var led3 = new gpio(20, 'out');
 var led4 = new gpio(21, 'out');
 var pwm_defaults = {
-  "freq":"50", // frequency of the device
+  "freq":50, // frequency of the device
   "correctionFactor": 1.118, // correction factor - fine tune the frequency 
   "address": "0x40", // i2c bus address
   "device": '/dev/i2c-1', // device name
   // "debug": <null> // adds some debugging methods if set 
 };
 var pwm = pca(pwm_defaults);
+
+var servo1 = {
+  "channel":0,
+  "min": 1000,
+  "max": 2000
+}
 
 setServoPulse = function(channel, pulse){
   var pulseLength;
@@ -75,12 +81,31 @@ io.on('connection', function(socket) {
         break;
     }
   });
+  socket.on('setservo', function(direction) {
+    switch(direction){
+     case 'min':
+        pwm.setPulse(servo1.channel, servo1.min);
+        console.log('send servo to min');
+        break;
+      case 'half':
+        pwm.setPulse(servo1.channel, (servo1.min+servo1.max)/2);
+        console.log('send servo to half');
+	break;
+      case 'max':
+        pwm.setPulse(servo1.channel, servo1.max);
+        console.log('send servo to max');
+        break;
+    }
+  });
 });
 
 
 
 
 function exit(){
+    console.log('Stopping pca...');
+    pwm.stop();
+
     console.log('Unloading gpio ...');
     led1.unexport();
     led2.unexport();

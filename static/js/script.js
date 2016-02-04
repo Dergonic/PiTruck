@@ -17,15 +17,28 @@ $(function () {
 	socket.emit('setled2', 'on');
 	$('#BtnE').addClass(activeClass);
 	break;
+      case 81:
+        socket.emit('setservo', 'min');
+        $('#ServoQ').addClass(activeClass);
+        break;
+      case 68:
+        socket.emit('setservo', 'max');
+        $('#ServoD').addClass(activeClass);
+        break;
     }
   });
   
   $(document).keyup(function(e){
     $('.btn').removeClass(activeClass);
 
-    if(e.which==69)
-    {
-	socket.emit('setled2', 'off');
+    switch(e.which){
+	case 69:
+	  socket.emit('setled2', 'off');
+	  break;
+	case 81:
+	case 68:
+	  socket.emit('setservo', 'half');
+	  break
     }
   });
 });
