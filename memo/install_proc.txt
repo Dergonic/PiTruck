@@ -22,13 +22,11 @@ cd ~
 mkdir pitruck
 cd pitruck
 npm init
-sudo npm install express socket.io pi-gpio async --save
-mkdir -p static/css static/js
-touch app.js static/index.html static/css/style.css static/js/script.js
+sudo npm install express socket.io pi-gpio async sleep --save
 
 
-git clone git://github.com/quick2wire/quick2wire-gpio-admin.git
-cd quick2wire-gpio-admin
-make
-sudo make install
-sudo adduser $USER gpio
+node libs to add : 
+https://github.com/johntreacy/adafruit-pca9685 
+https://github.com/jnovack/node-i2c/ <--For the pca
+
+
