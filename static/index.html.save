@@ -1,0 +1,16 @@
+<html>
+  <head>
+    <title>PiTruck</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+  </head>
+  <body>
+    <div class="wrapper">
+      <a id="ButtonA" class="btn btn-success">Switch led 1 on (a)</a>
+      <a id="ButtonZ" class="btn btn-danger">Switch led 1 off (z)</a>
+    </div>
+  </body>
+  <script type="text/javascript" src="/js/jquery-2.2.0.min.js"></script>
+  <script type="text/javascript" src="/js/socket.io-1.4.5.js"></script>
+  <script type="text/javascript" src="/js/script.js"></script>
+</html>
