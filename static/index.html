@@ -6,12 +6,23 @@
   </head>
   <body>
     <div class="wrapper">
-      <a id="BtnA" class="btn btn-success">Switch led 1 on (a)</a>
-      <a id="BtnZ" class="btn btn-danger">Switch led 1 off (z)</a>
-      <a id="BtnE" class="btn btn-primary">Switch led 2 toggle (e)</a>
-      <br />
-      <a id="ServoQ" class="btn btn-primary">Servo push min (q)</a>
-      <a id="ServoD" class="btn btn-primary">Servo push max (d)</a>
+	  <div class="row">
+	    <div class="col-sm-1"></div>
+	    <div class="col-sm-1"><a id="BtnAvance" class="btn btn-primary"><span class="glyphicon glyphicon-triangle-top" aria-hidden="true"></span> (z)</a></div>
+	    <div class="col-sm-1"></div>
+	  </div>
+	  <div class="row">
+	    <div class="col-sm-1"><a id="BtnGauche" class="btn btn-primary"><span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span> (q)</a></div>
+	    <div class="col-sm-1"><a id="BtnRecule" class="btn btn-primary"><span class="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span> (s)</a></div>
+	    <div class="col-sm-1"><a id="BtnDroite" class="btn btn-primary"><span class="glyphicon glyphicon-triangle-right" aria-hidden="true"></span> (d)</a></div>
+	  </div>
+	  <div class="row">
+	    <div class="col-md-2"><a id="BtnCrois" class="btn btn-primary">Feux de croisement (f)</a></div>
+	    <div class="col-md-2"><a id="BtnGrands" class="btn btn-primary">Grand feux (g-a)</a></div>
+	  </div>
+      <div class="row">
+	    <textarea id="logconsole" class="form-control" rows="8"></textarea>
+	  </div>
     </div>
   </body>
   <script type="text/javascript" src="/js/jquery-2.2.0.min.js"></script>

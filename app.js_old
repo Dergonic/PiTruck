@@ -1,0 +1,229 @@
+var express = require('express');
+var app = express();
+
+var server = require('http').Server(app);
+var heartbeat={'pingInterval':200,//ping each 200ms
+	       'pingTimeout' :200}// and espect a reply in the next 200 ms (otherwise, close)
+var io = require('socket.io')(server,heartbeat);
+
+
+
+
+var gpio = require('onoff').Gpio;
+
+var pca = require('/home/pi/PiTruck/libs/adafruit-pca9685.js');
+
+///////////////////////////////////////////////////
+// Starting http server
+///////////////////////////////////////////////////
+
+server.listen(3000,function(){
+    console.log('listening to port 3000');
+});
+
+app.use(express.static('static'));
+
+app.get('/', function(req, res){
+    res.sendFile(__dirname + '/static/index.html');
+});
+
+
+///////////////////////////////////////////////////
+// Init GPIO and PWM
+///////////////////////////////////////////////////
+
+//IDEA : Créer un objet par sortie. 
+/*
+function led(gpioport,resetvalue=1500) {
+  var gpio = new gpio(gpioport, 'out');
+  var defaultvalue = resetvalue;
+  var value = defaultvalue;
+  this.setvalue=function(val){
+    value=val;
+    gpio.write(val);
+  };
+  this.reset=function(){
+    value=defaultvalue;
+    gpio.write(defaultvalue);
+  }
+  this.getvalue=function(){
+    return value;
+  }
+}
+*/
+
+
+var led1 = new gpio(27, 'out'); var vled1=0; led1.write(vled1);
+var led2 = new gpio(22, 'out'); var vled2=0; led2.write(vled2);
+var led3 = new gpio(5 , 'out'); var vled3=0; led3.write(vled3);
+var led4 = new gpio(13, 'out'); var vled4=0; led4.write(vled4);
+//var button = new gpio(0, 'in', 'both');
+
+var pwm_defaults = {
+  "freq":50, // frequency of the device
+  "correctionFactor": 1.118, // correction factor - fine tune the frequency 
+  "address": "0x40", // i2c bus address
+  "device": '/dev/i2c-1' // device name
+  // "debug": <null> // adds some debugging methods if set 
+};
+
+var pwm = pca(pwm_defaults);
+
+var srv1 = {
+  "channel":0,
+  "min": 1000,
+  "max": 2000,
+  "val": 1500
+}
+
+
+/////////////////////////////////////////////////// 
+// function - setServoPulse 
+/////////////////////////////////////////////////// 
+// channel : channel of the servo on the pca 
+// 		from 0 to 15 
+// pulse : pulse length to determine servo orientation 
+// 		value is depending servo model 
+// 		common value from 1000 to 2000 
+///////////////////////////////////////////////////
+
+setServoPulse = function(channel, pulse){
+try{
+  var pulseLength;
+  pulseLength = 1000000;
+  pulseLength /= 60;
+  //print("%d us per period" % pulseLength);
+  pulseLength /= 4096;
+  //print("%d us per bit" % pulseLength);
+  pulse *= 1000;
+  pulse /= pulseLength;
+  return pwm.setPWM(channel, 0, pulse);
+}catch(e){console.log('ERROR'+e);}
+}
+
+
+///////////////////////////////////////////////////
+// socket listeners
+///////////////////////////////////////////////////
+
+io.on('connection', function(socket) {
+  log('CONNECTED');  
+
+  socket.on('setled1', function(direction) {
+    switch(direction){
+     case 'on':
+        if(vled1!=1) {        
+	  led1.write(1);
+          log('send led 1 on');
+          vled1=1;
+	}
+        break;
+      case 'off':
+      default:
+        if(vled1!=0) {
+	  led1.write(0);
+          log('send led 1 off');
+	  vled1=0;
+	}
+        break;
+    }
+  });
+  socket.on('setled2', function(direction) {
+    switch(direction){
+     case 'on':
+	if(vled2!=1){
+          led2.write(1);
+          log('send led 2 on');
+	  vled2=1;
+	}
+        break;
+      case 'off':
+      default:
+	if(vled2!=0){
+          led2.write(0);
+          log('send led 2 off');
+	  vled2=0;
+	}
+        break;
+    }
+  });
+  socket.on('setservo', function(direction) {
+    switch(direction){
+     case 'min':
+	if(srv1.val != srv1.min) {
+          pwm.setPulse(srv1.channel, srv1.min);
+          log('send servo min');
+	  srv1.val=srv1.min;
+	}
+        break;
+      case 'half':
+      default:
+	var half=(srv1.min+srv1.max)/2;
+        if(srv1.val != half) {
+          pwm.setPulse(srv1.channel, half);
+          log('send servo half');
+	  srv1.val=half;
+	}
+	break;
+      case 'max':
+        if(srv1.val != srv1.max) {
+          pwm.setPulse(srv1.channel, srv1.max);
+          log('send servo max');
+	  srv1.val=srv1.max;
+	}
+        break;
+    }
+  });
+
+
+
+  socket.on('disconnect', function(){
+    log('DISCONNECTED');
+    stop(); // done automatically
+  });
+
+
+  function log(text){
+    console.log(text);
+    socket.emit('log',text);
+  };
+
+  function stop(){ // stopping truck
+    log('EMERGENCY STOP');
+  }
+
+});
+
+
+///////////////////////////////////////////////////
+// function - exit
+///////////////////////////////////////////////////
+// Properly exiting the PCA, GPIO and process
+///////////////////////////////////////////////////
+
+function exit(socket){
+    console.log('Stopping pca...');
+    if(typeof socket !== 'undefined'){ socket.emit('log','Stopping pca ...');}
+    pwm.stop();
+
+    console.log('Unloading gpio ...');
+    if(typeof socket !== 'undefined'){ socket.emit('log','Unloading GPIO ...');}
+    led1.unexport();
+    led2.unexport();
+    led3.unexport();
+    led4.unexport();
+
+    console.log('Stopping server ...');
+    if(typeof socket !== 'undefined'){ socket.emit('log','Stopping server ...');}
+    io.close();
+    
+    console.log('Exiting ...');
+    process.exit(0);
+}
+
+
+///////////////////////////////////////////////////
+// grabbing the Ctrl+C to exit properly
+///////////////////////////////////////////////////
+
+process.on('SIGINT', exit);
