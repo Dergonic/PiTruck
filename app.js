@@ -45,6 +45,13 @@ Led.prototype.set = function(onoff){
 Led.prototype.get = function(){
 	return this.value;
 };
+Led.prototype.toggle = function(){
+	if(this.value == 1)
+		this.value=0;
+	else
+		this.value=1;
+	this.gpio.write(this.value);
+};
 Led.prototype.close = function(){
 	this.value = this.resetvalue;
 	this.gpio.write(this.value);
@@ -58,12 +65,6 @@ led['crois'] = new Led(5 , 1, 'Feux de croisement');
 led['arrie'] = new Led(13, 0, 'Feu de recul');
 led['clidr'] = new Led(19, 0, 'Clignotant droit');
 led['cliga'] = new Led(26, 0, 'clignotant gauche');
-
-//var button = new gpio(0, 'in', 'both');
-
-
-
-
 
 
 var pwm_defaults = {
@@ -156,12 +157,14 @@ io.on('connection', function(socket) {
 			case 'on':
 					if(led['crois'].get()!=1) {        
 						led['crois'].set(1);
+						log(socket,'Feux croisement on'); 
 					}
 					break;
 			case 'off':
 			default:
 					if(led['crois'].get()!=0) {        
 						led['crois'].set(0);
+						log(socket,'Feux croisement off'); 
 					}
 					break;
 		}
@@ -172,12 +175,14 @@ io.on('connection', function(socket) {
 			case 'on':
 					if(led['arrie'].get()!=1) {        
 						led['arrie'].set(1);
+						log(socket,'Feu recul on'); 
 					}
 					break;
 			case 'off':
 			default:
 					if(led['arrie'].get()!=0) {        
 						led['arrie'].set(0);
+						log(socket,'Feu recul off'); 
 					}
 					break;
 		}
@@ -187,12 +192,14 @@ io.on('connection', function(socket) {
 			case 'on':
 					if(led['gdfeu'].get()!=1) {        
 						led['gdfeu'].set(1);
+						log(socket,'Grands feux on'); 
 					}
 					break;
 			case 'off':
 			default:
 					if(led['gdfeu'].get()!=0) {        
 						led['gdfeu'].set(0);
+						log(socket,'Grands feux off'); 
 					}
 					break;
 		}
@@ -208,6 +215,7 @@ io.on('connection', function(socket) {
 			default:
 					if(led['frein'].get()!=0) {        
 						led['frein'].set(0);
+						log(socket,'Feux stop off'); 
 					}
 					break;
 		}
@@ -217,17 +225,20 @@ io.on('connection', function(socket) {
 			case 'droite':
 					if(servo['direction'].get() != servo['direction'].getmin()) {
 						servo['direction'].set(servo['direction'].getmin());
+						log(socket,'Droite'); 
 					}
 					break;
 			case 'gauche':
 					if(servo['direction'].get() != servo['direction'].getmax()) {
 						servo['direction'].set(servo['direction'].getmax());
+						log(socket,'Gauche'); 
 					}
 					break;
 			case 'neutre':
 			default:
 					if(servo['direction'].get() != servo['direction'].getresetvalue()) {
 						servo['direction'].reset();
+						log(socket,'Tout droit'); 
 					}
 					break;
 		}
@@ -237,17 +248,20 @@ io.on('connection', function(socket) {
 			case 'min':
 					if(servo['propulsion'].get() != servo['propulsion'].getmin()) {
 						servo['propulsion'].set(servo['propulsion'].getmin());
+						log(socket,'Recule'); 
 					}
 					break;
 			case 'max':
 					if(servo['propulsion'].get() != servo['propulsion'].getmax()) {
 						servo['propulsion'].set(servo['propulsion'].getmax());
+						log(socket,'Avance'); 
 					}
 					break;
 			case 'stop':
 			default:
 					if(servo['propulsion'].get() != servo['propulsion'].getresetvalue()) {
 						servo['propulsion'].reset();
+						log(socket,'Stop'); 
 					}
 					break;
 		}
@@ -303,10 +317,13 @@ function exit(socket){
 
 
 
-function log(scket, text){
+function log(socket, text){ 
 	console.log(text);
 	if(typeof socket !== 'undefined'){ 
 		socket.emit('log',text);
+	}
+	else{
+		console.log('undefined');
 	}
 };
 

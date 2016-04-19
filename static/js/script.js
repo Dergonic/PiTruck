@@ -33,23 +33,23 @@ $(function () {
 					}
 					break;
 			case 70: //F
-					if($('#BtnCrois').hasClass(activeClass)){
-						socket.emit('feucroisement', 'off');
-						$('#BtnCrois').removeClass(activeClass);
-					}
-					else{
+					if(! $('#BtnCrois').hasClass(activeClass)){
 						socket.emit('feucroisement', 'on');
 						$('#BtnCrois').addClass(activeClass);
 					}
+					else{
+						socket.emit('feucroisement', 'off');
+						$('#BtnCrois').removeClass(activeClass);
+					}
 					break;
 			case 71: //G
-					if($('#BtnGrands').hasClass(activeClass)){
-						socket.emit('grandphares', 'off');
-						$('#BtnGrands').removeClass(activeClass);
-					}
-					else{
+					if(! $('#BtnGrands').hasClass(activeClass)){
 						socket.emit('grandphares', 'on');
 						$('#BtnGrands').addClass(activeClass);
+					}
+					else{
+						socket.emit('grandphares', 'off');
+						$('#BtnGrands').removeClass(activeClass);
 					}
 					break;
 			case 65: //A
